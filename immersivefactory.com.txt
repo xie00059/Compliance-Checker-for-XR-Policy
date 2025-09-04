@@ -1,0 +1,65 @@
+Terms of Service
+Applicable since January 1, 2019
+Welcome to Immersive Factory.
+This page defines the legal framework for using Immersive Factory's websites, training exercises and services (referred to collectively as the "Immersive Factory Platform"), and consists of the Terms of Service, a Privacy Policy, a License Agreement, a Service Level Agreement (SLA), and a Refund Policy. Before using the Immersive Factory Platform, you should be aware of the content of all the aforementioned documents.
+Purpose of business
+Privacy
+License Agreement
+Service Level Agreement (SLA)
+Price
+Currency
+Tax
+Ordering, billing and payment:
+Online ordering and payment
+Online ordering and payment by bank transfer
+Ordering by telephone or email and payment by bank transfer
+Ordering via our Resellers or Partners
+Refund Policy
+Amendments
+Disputes
+Legal notice
+Purpose of business
+The main purpose of the Immersive Factory Platform is to offer virtual reality training exercises focusing on occupational health and safety (OH&S). These training exercises can be downloaded from the Immersive Factory website or via a dedicated utility (Launcher) and used with compatible VR headsets.
+Privacy
+We respect your privacy. If you subscribe to the Immersive Factory Platform, we may need to collect, process and store some of your personal data. We use our best efforts to minimize the collection of your personal data. We will use your personal information in a fair way and only to the extent needed for our activities. To find out more, please read our Privacy Policy.
+User license
+Before using or subscribing to the Immersive Factory Platform, make sure that you read and accept the License Agreement. By accepting these Terms of Service, you also accept our License Agreement.
+Service Level Agreement (SLA)
+Immersive Factory is committed to providing fast and reliable services. To find out more, please refer to our Service Level Agreement (SLA).
+Price
+Service prices are revised at the beginning of each year. For further information about the prices for subscriptions to the Immersive Factory Platform, please refer to our pricing page.
+Currency
+We sell subscriptions to users around the world. The payment currency depends on the country where the natural or legal person buying a subscription has a registered address ("Country of Purchase").
+Tax
+If you subscribe to the Immersive Factory Platform, you agree to pay the applicable fees and taxes, such as VAT, withholding tax and any other applicable taxes imposed by the relevant jurisdiction. If you are exempt from paying taxes, you must provide us with appropriate evidence of such exemption. Taxes are calculated according to the billing information that you provide at the time of subscription or order.
+Ordering, billing and payment:
+Online ordering and payment
+We invite you to use our pricing page for subscribing to the Immersive Factory Platform and paying directly by credit card with Stripe. You will need to sign into your Immersive Factory account and will be guided by our sales wizard. Depending on the chosen online payment method, you may be required to provide your payment information.
+Once you have successfully completed the online payment, it will be considered to be a "purchase". You can then download the exercises included in your subscription.
+Note that you will receive a copy of your invoice within two working days. Online payments are collected by Immersive Factory's head office. When you make an online payment by credit card to subscribe to the Immersive Factory Platform, your credit card details will be processed by Stripe on behalf of Immersive Factory.
+All credit card transactions are encrypted for your protection. Our website uses the Secure Sockets Layer (SSL) technology to ensure the security of your transaction. Ensure that all the SSL security features are enabled in your browser's preferences or options. You can verify that the page is protected when the URL displayed in the address bar begins with "https:". If you have any questions about your credit card charge, feel free to contact us.
+Online ordering and payment by bank transfer
+You can opt to send us an order form, which you can fill in and sign online if required. Your order will be processed within two working days of receiving your order form and verifying the data provided. You will receive an invoice to be paid by bank transfer. Please note that you may be charged fees for international bank transfers. Feel free to contact us for bank account information.
+Note that there is a minimum amount of 450 ex. tax for this type of order. If you would like to place an order for a lower amount, please use the online payment feature. The license will be activated on the date of the invoice. It will be blocked immediately if the payment deadlines indicated on the invoice are not respected.
+Ordering by telephone or email and payment by bank transfer
+You can place an order by telephone or email. Your order will be processed within two working days of receiving your order form and verifying the data provided. You will receive an invoice to be paid by bank transfer. Please note that you may be charged fees for international bank transfers. Feel free to contact us for bank account information.
+Note that there is a minimum amount of 450 ex. tax for this type of order. If you would like to place an order for a lower amount, please use the online payment feature. The license will be activated on the date of the invoice. It will be blocked immediately if the payment deadlines indicated on the invoice are not respected.
+Ordering via our Resellers or Partners
+We work with Resellers and Partners who can assist us in providing certain services to our customers, such as marketing, promotion, sales, training and support. When you place an order via a Reseller or Partner, these orders will be processed within two working days of receipt of payment or signed order form.
+In France, we have signed an exclusive partnership agreement with journéesécurité.com for the organization and running of safety days using our VR and AR catalog as the basis for workshops.
+Refund Policy
+In the event of a fault with the Immersive Factory Platform, we would advise you to contact us to arrange a refund (if you have purchased a product directly from us within the last 15 days) or follow the refund policy of the approved partner from whom you purchased your subscription to the Immersive Factory Platform. Please refer to our Refund Policy for further details.
+Amendments
+We reserve the right to amend or supplement these Terms of Service at any time. Any changes will be published on the website together with the effective date. We would advise you to visit the website to keep informed of any amendments. Where amendments significantly change your rights or obligations, we shall use our best efforts to notify you of such amendments. By continuing to use our products and services after the new version of the Terms of Service has become effective, you indicate that you have read, understood and accepted the current version thereof.
+Disputes
+Our contractual relationship will be governed by French law.
+Any disputes arising from our relationship will be referred to the jurisdiction of Paris Commercial Court.
+Legal notice
+Immersive Factory
+Simplified joint-stock company with a capital of €237,642
+Head office: 7 rue Léo Delibes, 75116 Paris, France,
+Incorporated in the Paris Register of Companies under number 821 839 040
+Email : support@immersivefactory.com
+All content of the platform is reserved for the use of the customer, for the training of its employees. It may not be resold without the prior written consent of Immersive Factory, nor used in paid training or animations not provided by Immersive Factory, its subsidiaries and certified partners.
+Thank you for reading our Terms of Service.
+We hope that you will enjoy using the Immersive Factory Platform.
