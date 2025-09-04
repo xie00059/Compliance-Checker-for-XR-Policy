@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR/AR Privacy Policy Compliance Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VR/AR Privacy Policy Compliance Assistant</h1>
+            <p>Step-by-step wizard for VR/AR app privacy policy compliance analysis</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+                <div class="step-indicators" id="stepIndicators"></div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Step 1: Start -->
+            <div class="step active" id="step1">
+                <div class="step-header">
+                    <h2>Step 1: Start</h2>
+                    <p>Create your VR/AR compliance project</p>
+                </div>
+                
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="appName">App Name *</label>
+                        <input type="text" id="appName" name="appName" placeholder="Enter your VR/AR app name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="appDescription">App Description *</label>
+                        <textarea id="appDescription" name="appDescription" placeholder="Describe your VR/AR application's purpose and functionality" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Domain</label>
+                        <div class="domain-badge">VR/AR (Pre-selected)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gptApiKey">OpenAI GPT API key (optional)</label>
+                        <div class="api-key-container">
+                            <input type="password" id="gptApiKey" name="gptApiKey" placeholder="sk-...">
+                            <button type="button" class="validate-key-btn" id="validateKeyBtn" onclick="validateApiKey()">Validate key</button>
+                        </div>
+                        <div class="api-key-status" id="apiKeyStatus" style="display: none;"></div>
+                        
+                        <div class="api-key-explanation">
+                            <p><strong>Used for:</strong></p>
+                            <ul>
+                                <li>(a) analyzing whether the app is high-risk under our policy-based screening</li>
+                                <li>(b) generating personalized, targeted follow-up questions during the interview</li>
+                            </ul>
+                            <p><strong>Optional:</strong> You can continue without a key, but analysis quality will be reduced and we'll fall back to keyword heuristics.</p>
+                            <p><strong>Privacy:</strong> We never store your key remotely; it is kept only in local runtime state for this session.</p>
+                        </div>
+
+                        <div class="continue-without-key">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="continueWithoutKey" name="continueWithoutKey" onchange="updateNavigationState()">
+                                <span class="checkmark"></span>
+                                Continue without key (reduced accuracy)
+                            </label>
+                        </div>
+
+                        <div class="navigation-message" id="navigationMessage" style="display: none;"></div>
+                    </div>
+
+                    <button class="btn-next" onclick="nextStep()">Continue to Policy Upload</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Upload/Enter Policy -->
+            <div class="step" id="step2">
+                <div class="step-header">
+                    <h2>Step 2: Upload/Enter Policy</h2>
+                    <p>Provide your existing privacy policy</p>
+                </div>
+                
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Policy Input Method</label>
+                        <div class="tab-group">
+                            <button type="button" class="tab-btn active" onclick="switchTab('paste')">Paste Text</button>
+                            <button type="button" class="tab-btn" onclick="switchTab('upload')">Upload PDF</button>
+                            <button type="button" class="tab-btn" onclick="switchTab('url')">From URL</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content active" id="paste-tab">
+                        <div class="form-group">
+                            <label for="policyText">Privacy Policy Text *</label>
+                            <textarea id="policyText" name="policyText" placeholder="Paste your privacy policy text here..." rows="10" required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="upload-tab">
+                        <div class="form-group">
+                            <label for="policyFile">Upload PDF</label>
+                            <div class="file-upload-area" onclick="document.getElementById('policyFile').click()">
+                                <input type="file" id="policyFile" accept=".pdf" style="display: none;">
+                                <div class="upload-icon">📄</div>
+                                <p>Click to upload PDF or drag and drop</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="url-tab">
+                        <div class="form-group">
+                            <label for="policyUrl">Privacy Policy URL</label>
+                            <input type="url" id="policyUrl" name="policyUrl" placeholder="https://yourapp.com/privacy-policy">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="region">Regulatory Region *</label>
+                        <select id="region" name="region" required>
+                            <option value="">Select Region</option>
+                            <option value="eu">European Union (GDPR)</option>
+                            <option value="us">United States</option>
+                            <option value="both">Both EU & US</option>
+                        </select>
+                    </div>
+
+                    <div class="step-buttons">
+                        <button class="btn-prev" onclick="prevStep()">Previous</button>
+                        <button class="btn-next" onclick="nextStep()">Analyze Policy</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: High-Risk Screening -->
+            <div class="step" id="step3">
+                <div class="step-header">
+                    <h2>Step 3: High-Risk Screening</h2>
+                    <p>Analyzing policy for risk signals</p>
+                </div>
+                
+                <div class="screening-results" id="screeningResults">
+                    <div class="loading-spinner" id="loadingSpinner">
+                        <div class="spinner"></div>
+                        <p>Analyzing privacy policy...</p>
+                    </div>
+                    
+                    <div class="risk-assessment" id="riskAssessment" style="display: none;">
+                        <div class="risk-badge" id="riskBadge"></div>
+                        <div class="risk-reasons" id="riskReasons"></div>
+                    </div>
+                </div>
+
+                <div class="step-buttons">
+                    <button class="btn-prev" onclick="prevStep()">Previous</button>
+                    <button class="btn-next" onclick="nextStep()" disabled id="step3Next">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Checklist Scope -->
+            <div class="step" id="step4">
+                <div class="step-header">
+                    <h2>Step 4: Checklist Scope</h2>
+                    <p>Selected compliance framework based on risk assessment</p>
+                </div>
+                
+                <div class="checklist-selection" id="checklistSelection">
+                    <div class="checklist-preview" id="checklistPreview"></div>
+                </div>
+
+                <div class="step-buttons">
+                    <button class="btn-prev" onclick="prevStep()">Previous</button>
+                    <button class="btn-next" onclick="nextStep()">Configure Interview</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Personas & Settings -->
+            <div class="step" id="step5">
+                <div class="step-header">
+                    <h2>Step 5: Personas & Settings</h2>
+                    <p>Configure the compliance interview</p>
+                </div>
+                
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="interviewerPersona">Interviewer Persona</label>
+                        <select id="interviewerPersona" name="interviewerPersona">
+                            <option value="legal-expert">Legal Expert (Default)</option>
+                            <option value="compliance-officer">Compliance Officer</option>
+                            <option value="privacy-auditor">Privacy Auditor</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="developerPersona">Developer Persona</label>
+                        <select id="developerPersona" name="developerPersona">
+                            <option value="legally-unaware">Legally Unaware (Default)</option>
+                            <option value="partially-informed">Partially Informed</option>
+                            <option value="legally-savvy">Legally Savvy</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Interview Settings</label>
+                        <div class="settings-grid">
+                            <div class="setting-item">
+                                <label for="ambiguityLevel">Ambiguity Level</label>
+                                <select id="ambiguityLevel">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label for="conflictTendency">Conflict Detection</label>
+                                <select id="conflictTendency">
+                                    <option value="strict" selected>Strict</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="lenient">Lenient</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label>Max Questions per Item</label>
+                                <input type="number" value="3" min="1" max="5" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-buttons">
+                        <button class="btn-prev" onclick="prevStep()">Previous</button>
+                        <button class="btn-next" onclick="nextStep()">Generate Scenarios</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Scenario Seeds -->
+            <div class="step" id="step6">
+                <div class="step-header">
+                    <h2>Step 6: Scenario Seeds</h2>
+                    <p>Auto-generated test scenarios in Gherkin format</p>
+                </div>
+                
+                <div class="scenarios-section" id="scenariosSection">
+                    <div class="loading-spinner" id="scenarioLoading">
+                        <div class="spinner"></div>
+                        <p>Generating scenarios...</p>
+                    </div>
+                    
+                    <div class="scenarios-list" id="scenariosList" style="display: none;"></div>
+                </div>
+
+                <div class="step-buttons">
+                    <button class="btn-prev" onclick="prevStep()">Previous</button>
+                    <button class="btn-next" onclick="nextStep()" disabled id="step6Next">Start Interview</button>
+                </div>
+            </div>
+
+            <!-- Step 7: Interview -->
+            <div class="step" id="step7">
+                <div class="step-header">
+                    <h2>Step 7: Live Compliance Interview</h2>
+                    <p>One question per turn, max 3 questions per checklist item</p>
+                </div>
+                
+                <div class="interview-layout">
+                    <div class="interview-main">
+                        <div class="transcript" id="transcript"></div>
+                        <div class="interview-controls" id="interviewControls">
+                            <button class="btn-interview" onclick="sendToDeveloper()" disabled id="sendBtn">Send to Developer</button>
+                            <button class="btn-interview" onclick="skipQuestion()" id="skipBtn">Skip Question</button>
+                        </div>
+                    </div>
+                    
+                    <div class="interview-sidebar">
+                        <div class="progress-tracker">
+                            <h3>Progress</h3>
+                            <div class="progress-stats" id="progressStats"></div>
+                            <div class="checklist-items" id="checklistProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-buttons">
+                    <button class="btn-prev" onclick="prevStep()">Previous</button>
+                    <button class="btn-next" onclick="nextStep()" disabled id="step7Next">Review Evidence</button>
+                </div>
+            </div>
+
+            <!-- Step 8: Evidence & Coverage -->
+            <div class="step" id="step8">
+                <div class="step-header">
+                    <h2>Step 8: Evidence & Coverage</h2>
+                    <p>Coverage analysis and evidence snippets</p>
+                </div>
+                
+                <div class="coverage-section">
+                    <div class="coverage-table" id="coverageTable"></div>
+                </div>
+
+                <div class="step-buttons">
+                    <button class="btn-prev" onclick="prevStep()">Previous</button>
+                    <button class="btn-next" onclick="nextStep()">Generate Redlines</button>
+                </div>
+            </div>
+
+            <!-- Step 9: Redline Draft -->
+            <div class="step" id="step9">
+                <div class="step-header">
+                    <h2>Step 9: Redline Draft</h2>
+                    <p>Suggested policy improvements</p>
+                </div>
+                
+                <div class="redlines-section" id="redlinesSection">
+                    <div class="loading-spinner" id="redlineLoading">
+                        <div class="spinner"></div>
+                        <p>Generating policy improvements...</p>
+                    </div>
+                    
+                    <div class="redlines-content" id="redlinesContent" style="display: none;"></div>
+                </div>
+
+                <div class="step-buttons">
+                    <button class="btn-prev" onclick="prevStep()">Previous</button>
+                    <button class="btn-next" onclick="nextStep()">Export Results</button>
+                </div>
+            </div>
+
+            <!-- Step 10: Export & Finish -->
+            <div class="step" id="step10">
+                <div class="step-header">
+                    <h2>Step 10: Export & Finish</h2>
+                    <p>Download your compliance analysis results</p>
+                </div>
+                
+                <div class="export-section">
+                    <div class="export-summary" id="exportSummary"></div>
+                    
+                    <div class="export-buttons">
+                        <button class="btn-export" onclick="downloadReport('json')">📄 Project Data (JSON)</button>
+                        <button class="btn-export" onclick="downloadReport('transcript')">💬 Interview Transcript (MD)</button>
+                        <button class="btn-export" onclick="downloadReport('coverage')">📊 Coverage Report (CSV)</button>
+                        <button class="btn-export" onclick="downloadReport('redlines')">✏️ Redline Draft (DOCX)</button>
+                    </div>
+                    
+                    <div class="finish-actions">
+                        <button class="btn-finish" onclick="resetProject()">Start New Project</button>
+                        <button class="btn-finish" onclick="downloadAll()">Download All & Finish</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Key Modal -->
+    <div class="modal" id="testKeyModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>API Key Test</h3>
+                <span class="close" onclick="closeTestKeyModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="testKeyModalBody">
+                <div class="test-progress">
+                    <div class="spinner"></div>
+                    <p>Testing your API key...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="high_risk_prompt.js"></script>
+    <script src="checklists.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
