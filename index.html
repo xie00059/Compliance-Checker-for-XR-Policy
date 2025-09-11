@@ -87,7 +87,6 @@
                         <div class="tab-group">
                             <button type="button" class="tab-btn active" onclick="switchTab('paste')">Paste Text</button>
                             <button type="button" class="tab-btn" onclick="switchTab('upload')">Upload PDF</button>
-                            <button type="button" class="tab-btn" onclick="switchTab('url')">From URL</button>
                         </div>
                     </div>
 
@@ -106,23 +105,20 @@
                                 <div class="upload-icon">📄</div>
                                 <p>Click to upload PDF or drag and drop</p>
                             </div>
+                            <div id="pdfStatus" class="pdf-status" style="display: none;"></div>
+                            <div id="pdfPreview" class="pdf-preview" style="display: none;">
+                                <h4>Extracted Text Preview:</h4>
+                                <div id="pdfTextContent" class="pdf-text-content"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="tab-content" id="url-tab">
-                        <div class="form-group">
-                            <label for="policyUrl">Privacy Policy URL</label>
-                            <input type="url" id="policyUrl" name="policyUrl" placeholder="https://yourapp.com/privacy-policy">
-                        </div>
-                    </div>
 
                     <div class="form-group">
                         <label for="region">Regulatory Region *</label>
                         <select id="region" name="region" required>
                             <option value="">Select Region</option>
-                            <option value="eu">European Union (GDPR)</option>
-                            <option value="us">United States</option>
-                            <option value="both">Both EU & US</option>
+                            <option value="eu">European Union (GDPR & AIA)</option>
                         </select>
                     </div>
 
@@ -186,18 +182,20 @@
                     <div class="form-group">
                         <label for="interviewerPersona">Interviewer Persona</label>
                         <select id="interviewerPersona" name="interviewerPersona">
-                            <option value="legal-expert">Legal Expert (Default)</option>
-                            <option value="compliance-officer">Compliance Officer</option>
-                            <option value="privacy-auditor">Privacy Auditor</option>
+                            <option value="legal-expert">Legal Expert / Compliance Officer</option>
+                            <option value="technical-auditor">Technical Auditor</option>
+                            <option value="ethics-specialist">Ethics/Trust Specialist</option>
+                            <option value="regulatory-generalist">Regulatory Generalist (Default)</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label for="developerPersona">Developer Persona</label>
                         <select id="developerPersona" name="developerPersona">
-                            <option value="legally-unaware">Legally Unaware (Default)</option>
-                            <option value="partially-informed">Partially Informed</option>
-                            <option value="legally-savvy">Legally Savvy</option>
+                            <option value="legally-aware">Legally Aware Developer</option>
+                            <option value="legally-unaware">Legally Unaware Developer (Default)</option>
+                            <option value="technical-oriented">Technically Oriented Developer</option>
+                            <option value="business-oriented">Market/Business-Oriented Developer</option>
                         </select>
                     </div>
 
@@ -368,6 +366,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="high_risk_prompt.js"></script>
     <script src="checklists.js"></script>
     <script src="script.js"></script>

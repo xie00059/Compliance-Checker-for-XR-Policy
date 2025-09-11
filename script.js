@@ -15,7 +15,7 @@ const ComplianceState = {
         region: '',
         riskResult: null,
         activeChecklist: [],
-        interviewerPersona: 'legal-expert',
+        interviewerPersona: 'regulatory-generalist',
         developerPersona: 'legally-unaware',
         scenarios: [],
         transcript: [],
@@ -84,7 +84,7 @@ function setupEventListeners() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.textContent.toLowerCase().replace(' ', '');
-            switchTab(tab === 'pastetext' ? 'paste' : tab === 'uploadpdf' ? 'upload' : 'url');
+            switchTab(tab === 'pastetext' ? 'paste' : 'upload');
         });
     });
 
@@ -361,7 +361,7 @@ function validateStep2() {
     const policyText = document.getElementById('policyText').value.trim();
     const region = document.getElementById('region').value;
     
-    if (!policyText && !document.getElementById('policyFile').files[0] && !document.getElementById('policyUrl').value) {
+    if (!policyText && !document.getElementById('policyFile').files[0]) {
         alert('Please provide your privacy policy through one of the available methods');
         return false;
     }
@@ -409,8 +409,7 @@ function switchTab(tabName) {
     // Add active class to selected tab and content
     const tabMap = {
         'paste': 'Paste Text',
-        'upload': 'Upload PDF',
-        'url': 'From URL'
+        'upload': 'Upload PDF'
     };
     
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -422,13 +421,127 @@ function switchTab(tabName) {
     document.getElementById(`${tabName}-tab`).classList.add('active');
 }
 
-// File upload handler
-function handleFileUpload(event) {
+// File upload handler with PDF text extraction
+async function handleFileUpload(event) {
     const file = event.target.files[0];
-    if (file && file.type === 'application/pdf') {
-        // In a real implementation, you would use a PDF parsing library
-        alert('PDF upload functionality would be implemented with a PDF parsing library');
-        ComplianceState.projectData.policyText = '[PDF content would be extracted here]';
+    const pdfStatus = document.getElementById('pdfStatus');
+    const pdfPreview = document.getElementById('pdfPreview');
+    const pdfTextContent = document.getElementById('pdfTextContent');
+    
+    if (!file) {
+        hidePdfPreview();
+        return;
+    }
+    
+    if (file.type !== 'application/pdf') {
+        showPdfStatus('Please select a PDF file', 'error');
+        hidePdfPreview();
+        return;
+    }
+    
+    try {
+        showPdfStatus('Processing PDF...', 'loading');
+        hidePdfPreview();
+        
+        const extractedText = await extractTextFromPDF(file);
+        
+        if (extractedText && extractedText.trim().length > 0) {
+            // Store the extracted text in the project data
+            ComplianceState.projectData.policyText = extractedText;
+            
+            // Show success status
+            showPdfStatus(`✅ PDF processed successfully (${extractedText.length} characters extracted)`, 'success');
+            
+            // Show text preview
+            showPdfPreview(extractedText);
+            
+        } else {
+            showPdfStatus('⚠️ No text could be extracted from this PDF. It might be an image-based PDF.', 'warning');
+            hidePdfPreview();
+        }
+        
+    } catch (error) {
+        console.error('PDF processing error:', error);
+        showPdfStatus(`❌ Error processing PDF: ${error.message}`, 'error');
+        hidePdfPreview();
+    }
+}
+
+// Extract text from PDF using PDF.js
+async function extractTextFromPDF(file) {
+    return new Promise((resolve, reject) => {
+        const fileReader = new FileReader();
+        
+        fileReader.onload = async function(e) {
+            try {
+                const arrayBuffer = e.target.result;
+                
+                // Configure PDF.js worker
+                if (typeof pdfjsLib !== 'undefined') {
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                    
+                    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    let fullText = '';
+                    
+                    // Extract text from each page
+                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        const page = await pdf.getPage(pageNum);
+                        const textContent = await page.getTextContent();
+                        
+                        const pageText = textContent.items
+                            .map(item => item.str)
+                            .join(' ')
+                            .trim();
+                            
+                        if (pageText) {
+                            fullText += pageText + '\n\n';
+                        }
+                    }
+                    
+                    resolve(fullText.trim());
+                } else {
+                    reject(new Error('PDF.js library not loaded'));
+                }
+                
+            } catch (error) {
+                reject(error);
+            }
+        };
+        
+        fileReader.onerror = () => reject(new Error('Failed to read file'));
+        fileReader.readAsArrayBuffer(file);
+    });
+}
+
+// Show PDF processing status
+function showPdfStatus(message, type) {
+    const pdfStatus = document.getElementById('pdfStatus');
+    pdfStatus.textContent = message;
+    pdfStatus.className = `pdf-status ${type}`;
+    pdfStatus.style.display = 'block';
+}
+
+// Show PDF text preview
+function showPdfPreview(text) {
+    const pdfPreview = document.getElementById('pdfPreview');
+    const pdfTextContent = document.getElementById('pdfTextContent');
+    
+    // Show the entire extracted text
+    pdfTextContent.textContent = text;
+    pdfPreview.style.display = 'block';
+}
+
+// Hide PDF preview
+function hidePdfPreview() {
+    const pdfPreview = document.getElementById('pdfPreview');
+    const pdfStatus = document.getElementById('pdfStatus');
+    pdfPreview.style.display = 'none';
+    pdfStatus.style.display = 'none';
+    
+    // Clear the policy text if it was from a PDF
+    if (ComplianceState.projectData.policyText && 
+        ComplianceState.projectData.policyText.includes('[PDF content')) {
+        ComplianceState.projectData.policyText = '';
     }
 }
 
@@ -1140,21 +1253,65 @@ function startNextQuestion() {
 }
 
 function generateQuestion(item) {
-    const questionTemplates = {
-        '1.1': 'Can you explain the specific lawful basis your VR application relies on for processing personal data, and where this is documented in your privacy policy?',
-        '1.2': 'How does your privacy policy inform users about their rights under GDPR, particularly regarding data collected through VR interactions?',
-        '1.3': 'What are your data retention periods for VR usage data, and how are these communicated to users?',
-        '2.1': 'Walk me through your consent mechanism - how do users provide consent for data collection in your VR environment?',
-        '2.2': 'If a user requests data portability for their VR interaction data, what process do you follow?',
-        '3.1': 'Does your VR application transfer data internationally? If so, what safeguards are in place?',
-        '4.1': 'Have you conducted a risk assessment specifically for AI components in your VR system?',
-        '4.2': 'How do you ensure transparency when AI algorithms process user data in real-time during VR sessions?',
-        '5.1': 'Your VR app likely collects biometric data (eye tracking, hand gestures). What specific protections are in place?',
-        '5.2': 'What VR-specific privacy risks have you identified and how are they addressed in your policy?',
-        '6.1': 'How do you inform users about real-time data processing that occurs during VR experiences?'
+    const persona = ComplianceState.projectData.interviewerPersona;
+    
+    const questionsByPersona = {
+        'legal-expert': {
+            '1.1': 'Under Article 6(1) of GDPR, what specific lawful basis does your VR application rely on for processing personal data? Please cite the exact legal basis and explain how it\'s documented in your privacy policy.',
+            '1.2': 'How does your privacy policy comply with Articles 13 and 14 of GDPR regarding information provision to data subjects, particularly for VR-specific data collection?',
+            '1.3': 'What are your data retention periods in compliance with Article 5(1)(e) of GDPR, and how do you justify these periods under the proportionality principle?',
+            '2.1': 'Walk me through your consent mechanism under Article 7 of GDPR - how do you ensure consent is freely given, specific, informed, and unambiguous in your VR environment?',
+            '2.2': 'How do you handle data portability requests under Article 20 of GDPR for VR interaction data, and what technical measures do you have in place?',
+            '3.1': 'For international data transfers, which Chapter V mechanism do you rely on - adequacy decisions, appropriate safeguards, or derogations under Article 49?',
+            '4.1': 'Under the EU AI Act, how have you classified your AI system, and what conformity assessment procedures have you implemented?',
+            '4.2': 'How do you ensure compliance with AI Act transparency obligations under Articles 13 and 52 for real-time AI processing?',
+            '5.1': 'Given that biometric data is special category data under Article 9 of GDPR, what specific legal basis and safeguards have you implemented?',
+            '5.2': 'Have you conducted a DPIA under Article 35 of GDPR for your VR application, particularly regarding biometric processing?',
+            '6.1': 'How do you ensure compliance with the principle of transparency under Article 5(1)(a) for real-time data processing in VR environments?'
+        },
+        'technical-auditor': {
+            '1.1': 'What technical measures are in place to ensure data minimization, and how do you verify that only necessary data is processed?',
+            '1.2': 'What encryption standards and key management practices do you use for protecting user data at rest and in transit?',
+            '1.3': 'How is automated data deletion implemented in your system architecture, and what backup/recovery procedures affect retention?',
+            '2.1': 'What technical implementation supports your consent management - can you show me the system architecture for consent capture and withdrawal?',
+            '2.2': 'What data export formats and APIs do you provide for data portability, and how do you ensure data integrity during transfer?',
+            '3.1': 'What technical safeguards secure international data transfers - encryption protocols, network security, and access controls?',
+            '4.1': 'What technical documentation exists for your AI algorithms, and how do you ensure algorithmic accountability?',
+            '4.2': 'How do you technically implement real-time transparency - logging, user notifications, and audit trails?',
+            '5.1': 'What specific technical safeguards protect biometric data - hashing, encryption, anonymization techniques?',
+            '5.2': 'How does your system architecture prevent unauthorized access to sensitive VR data, and what monitoring is in place?',
+            '6.1': 'What technical mechanisms notify users about real-time processing, and how do you log these interactions?'
+        },
+        'ethics-specialist': {
+            '1.1': 'How do you ensure fairness and non-discrimination in your data processing practices, particularly for vulnerable users?',
+            '1.2': 'How do you make privacy information accessible and understandable for all users, including those with disabilities?',
+            '1.3': 'How do you balance business interests with user privacy rights when setting retention periods?',
+            '2.1': 'How do you ensure consent is meaningful and not coercive, especially for immersive VR experiences?',
+            '2.2': 'How do you ensure data portability doesn\'t disadvantage users or create barriers to switching services?',
+            '3.1': 'How do you ensure international transfers don\'t compromise user rights or expose them to surveillance risks?',
+            '4.1': 'How do you address potential bias and discrimination in your AI systems, particularly for diverse user groups?',
+            '4.2': 'How do you ensure AI transparency promotes user understanding rather than just meeting legal requirements?',
+            '5.1': 'How do you ensure biometric data collection doesn\'t create discriminatory outcomes or infringe on human dignity?',
+            '5.2': 'What measures prevent your VR system from being used for surveillance or manipulation of users?',
+            '6.1': 'How do you ensure real-time processing transparency empowers rather than overwhelms users with information?'
+        },
+        'regulatory-generalist': {
+            '1.1': 'Can you explain in simple terms why you collect user data and how this benefits users?',
+            '1.2': 'How would a regular user find out what rights they have regarding their data in your app?',
+            '1.3': 'How long do you keep user data, and can users easily understand why?',
+            '2.1': 'When users start using your VR app, how do they agree to data collection? Is this process clear?',
+            '2.2': 'If I wanted to take my data to a different VR app, how would I do that?',
+            '3.1': 'Do you send user data to other countries? How do you keep it safe when you do?',
+            '4.1': 'Does your app use AI? How do you make sure it\'s working fairly for all users?',
+            '4.2': 'When your app makes automatic decisions about users, how do they know this is happening?',
+            '5.1': 'Your app probably tracks things like eye movements - how do you protect this sensitive information?',
+            '5.2': 'What privacy risks does VR create that regular apps don\'t have? How do you address these?',
+            '6.1': 'How do users know what data is being collected while they\'re using your VR app?'
+        }
     };
     
-    return questionTemplates[item.id] || `Please explain how your privacy policy addresses: ${item.text}`;
+    const questions = questionsByPersona[persona] || questionsByPersona['regulatory-generalist'];
+    return questions[item.id] || `Please explain how your privacy policy addresses: ${item.text}`;
 }
 
 function sendToDeveloper() {
@@ -1188,15 +1345,43 @@ function sendToDeveloper() {
 }
 
 function generateDeveloperResponse() {
-    const responses = [
-        "We collect basic usage analytics through our VR platform, but I'm not entirely sure about the specific legal basis. I think it's legitimate interest?",
-        "Users can contact us via email to request their data, though we haven't implemented an automated system yet.",
-        "We use Google Analytics and some third-party VR tracking services, but I'd need to check the exact data transfer details with our backend team.",
-        "Our privacy policy covers the basics, but we might need to add more specific language about VR data collection.",
-        "We do collect eye tracking data for user experience optimization, but I'm not sure if we explicitly mention biometric data protections.",
-        "Data retention is handled by our cloud provider's default settings. We haven't set specific retention periods yet."
-    ];
+    const persona = ComplianceState.projectData.developerPersona;
     
+    const responsesByPersona = {
+        'legally-aware': [
+            "We process personal data based on legitimate interest as outlined in Article 6(1)(f) of GDPR, specifically for improving VR experience quality and system performance.",
+            "Our consent mechanism complies with GDPR Article 7 requirements - we obtain explicit, informed consent before any biometric data processing begins.",
+            "We've implemented data portability measures under Article 20, though I should clarify our current technical limitations with the legal team.",
+            "For AI Act compliance, we've classified our system as limited risk and implemented appropriate transparency measures, though we're still reviewing the biometric identification components.",
+            "Our data retention periods follow the proportionality principle - we keep interaction data for 18 months and delete biometric identifiers after each session, as documented in our privacy policy."
+        ],
+        'legally-unaware': [
+            "We collect basic usage analytics through our VR platform, but I'm not entirely sure about the specific legal basis. I think it's legitimate interest?",
+            "Users can contact us via email to request their data, though we haven't implemented an automated system yet.",
+            "We use Google Analytics and some third-party VR tracking services, but I'd need to check the exact data transfer details with our backend team.",
+            "Our privacy policy covers the basics, but we might need to add more specific language about VR data collection.",
+            "We do collect eye tracking data for user experience optimization, but I'm not sure if we explicitly mention biometric data protections.",
+            "Data retention is handled by our cloud provider's default settings. We haven't set specific retention periods yet."
+        ],
+        'technical-oriented': [
+            "The gaze data is anonymized at the sensor level using SHA-256 hashing before transmission to our analytics pipeline.",
+            "We implement end-to-end encryption with AES-256 for all biometric data streams, so privacy risks are minimal from a technical standpoint.",
+            "Our system uses differential privacy algorithms to ensure individual users can't be re-identified from aggregated VR behavior patterns.",
+            "Data is processed locally on-device first, then only statistical summaries are uploaded to our secure cloud infrastructure with TLS 1.3.",
+            "We've architected the system with zero-knowledge protocols - even we can't decrypt individual user biometric signatures.",
+            "The retention is technically driven - we purge data when our ML models reach convergence, typically after 10,000 training iterations."
+        ],
+        'business-oriented': [
+            "We use this data primarily for personalization and delivering better targeted experiences - users love the customized VR environments we create.",
+            "The data helps us optimize ad placement within VR spaces and increase user engagement metrics, which directly improves ROI for our advertising partners.",
+            "Honestly, most users don't really care about retention periods as long as they get a great VR experience. Our focus is on user satisfaction.",
+            "We collect comprehensive behavioral data because it allows us to create more immersive, profitable VR experiences that users actually want to use.",
+            "The biometric data is incredibly valuable for understanding user preferences and emotional responses - it's a key competitive advantage for us.",
+            "From a business perspective, the more data we collect, the better we can serve users and generate revenue. Privacy concerns are secondary to user experience."
+        ]
+    };
+    
+    const responses = responsesByPersona[persona] || responsesByPersona['legally-unaware'];
     return responses[Math.floor(Math.random() * responses.length)];
 }
 
